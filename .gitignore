@@ -1,0 +1,5 @@
+.build/
+Punch.app/
+Punch-Installer.dmg
+.swiftpm/
+.DS_Store
