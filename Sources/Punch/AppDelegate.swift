@@ -97,10 +97,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
-        let dexLink = NSMenuItem(title: "Open on DexScreener", action: #selector(openDexScreener), keyEquivalent: "o")
+        let dexLink = NSMenuItem(title: "Open on DexScreener", action: #selector(openDexScreener), keyEquivalent: "d")
         dexLink.keyEquivalentModifierMask = .command
         dexLink.target = self
         menu.addItem(dexLink)
+
+        let pumpLink = NSMenuItem(title: "Open on Pump.fun", action: #selector(openPumpFun), keyEquivalent: "p")
+        pumpLink.keyEquivalentModifierMask = .command
+        pumpLink.target = self
+        menu.addItem(pumpLink)
 
         menu.addItem(NSMenuItem.separator())
 
@@ -123,6 +128,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let urlStr = lastTokenData?.dexScreenerUrl
             ?? "https://dexscreener.com/solana/\(DexScreenerAPI.tokenAddress)"
         if let url = URL(string: urlStr) {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    @objc private func openPumpFun() {
+        if let url = URL(string: "https://pump.fun/coin/\(DexScreenerAPI.tokenAddress)") {
             NSWorkspace.shared.open(url)
         }
     }
