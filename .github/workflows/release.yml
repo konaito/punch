@@ -1,0 +1,42 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release binary
+        run: swift build -c release
+
+      - name: Create .app bundle and DMG
+        run: |
+          APP_DIR="Punch.app/Contents/MacOS"
+          mkdir -p "$APP_DIR" "Punch.app/Contents/Resources"
+          cp .build/release/Punch "$APP_DIR/Punch"
+          cp Resources/Info.plist Punch.app/Contents/Info.plist
+          codesign --force --sign - Punch.app
+
+          mkdir -p dmg_tmp
+          cp -R Punch.app dmg_tmp/
+          ln -s /Applications dmg_tmp/Applications
+          hdiutil create -volname "Punch" -srcfolder dmg_tmp -ov -format UDZO Punch-Installer.dmg -quiet
+          rm -rf dmg_tmp
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(date +%s)
+          gh release create "${VERSION}" \
+            Punch-Installer.dmg \
+            --title "Punch ${VERSION}" \
+            --notes "Build $(date -u '+%Y-%m-%d %H:%M:%S UTC') from \`${GITHUB_SHA::7}\`" \
+            --latest
